@@ -1,0 +1,67 @@
+{
+  "name": "@fhuang/mcp-juejin-server",
+  "version": "1.0.0",
+  "description": "The Model Context Protocol (MCP) server establishes a standardized JSON-RPC 2.0 interface for juejin operations,When publishing an article, automatically upload local file images",
+  "type": "module",
+  "bin": {
+    "mcp-mysql": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:setup": "playwright test login.setup.ts",
+    "test:e2e:ui": "playwright test --ui"
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "prepare-inspect": "npm run prepare && npm run inspector",
+    "publish": "npm publish --access public --registry=https://registry.npmjs.org/",
+    "start": "node build/markdown_to_juejin_publisher.js",
+    "dev": "tsx src/markdown_to_juejin_publisher.ts",
+    "test-publish": "npm run dev -- src/example.md --publish",
+    "test-draft": "npm run dev -- src/example.md"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mysql",
+    "database",
+    "claude",
+    "anthropic"
+  ],
+  "author": "huangfeng19820712",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/puppeteer": "^7.0.4",
+    "clipboardy": "^4.0.0",
+    "dotenv": "^16.4.7",
+    "fs-extra": "^11.3.0",
+    "markdown-it": "^14.1.0",
+    "mcp-evals": "^1.0.18",
+    "pino": "^8.0.0",
+    "pino-pretty": "^13.0.0",
+    "playwright": "^1.54.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.19.9",
+    "cross-env": "^7.0.3",
+    "jest": "^30.0.5",
+    "ts-jest": "^29.4.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huangfeng19820712/mcp-mysql-server"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

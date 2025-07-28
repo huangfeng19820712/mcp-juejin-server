@@ -1,0 +1,17 @@
+# 掘金账号配置（可选）
+# 如果设置了 JUEJIN_USERNAME，程序会自动预填充登录表单
+# 注意：程序仅支持手动登录，不会自动填写密码
+
+# 掘金账号（邮箱或手机号，用于预填充登录表单）
+JUEJIN_USERNAME=your_email@example.com
+
+# 日志级别配置（可选）
+# 可选值：debug, info, warn, error
+# 默认值：info
+LOG_LEVEL=info
+
+# 注意：
+# 1. 请将 config.example 复制为 .env 并填入真实的账号信息
+# 2. 不要将 .env 文件提交到版本控制系统
+# 3. 程序仅支持手动登录，确保账号安全
+# 4. 如果不想使用账号预填充，可以不设置 JUEJIN_USERNAME 
