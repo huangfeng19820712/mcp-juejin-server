@@ -4,7 +4,7 @@
   "description": "The Model Context Protocol (MCP) server establishes a standardized JSON-RPC 2.0 interface for juejin operations,When publishing an article, automatically upload local file images",
   "type": "module",
   "bin": {
-    "mcp-mysql": "./build/index.js"
+    "mcp-juejin": "./build/index.js"
   },
   "files": [
     "build"
@@ -19,8 +19,8 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "prepare-inspect": "npm run prepare && npm run inspector",
     "publish": "npm publish --access public --registry=https://registry.npmjs.org/",
-    "start": "node build/markdown_to_juejin_publisher.js",
-    "dev": "tsx src/markdown_to_juejin_publisher.ts",
+    "start": "node build/index.js",
+    "dev": "tsx src/index.ts",
     "test-publish": "npm run dev -- src/example.md --publish",
     "test-draft": "npm run dev -- src/example.md"
   },

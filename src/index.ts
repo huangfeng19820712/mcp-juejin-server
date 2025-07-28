@@ -1,101 +1,54 @@
-import fs from 'fs-extra';
-import MarkdownIt from 'markdown-it';
-import clipboardy from 'clipboardy';
+import { JuejinPublisher } from './JuejinPublisher.js';
+import { PublishOptions } from './types.js';
 import path from 'path';
+import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { MarkdownData, ImageData } from './types.js';
-
-// 计算 __dirname (在 ESM 中使用)
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-// 初始化 markdown-it
-const md = new MarkdownIt();
-
-/**
- * 解析 Markdown 文件，提取文字和图片
- * @param filePath Markdown 文件路径
- * @returns 包含文字内容和图片数据的对象
- */
-async function parseMarkdown(filePath: string): Promise<MarkdownData> {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8');
-    const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-    const images: ImageData[] = [];
-    let match: RegExpExecArray | null;
-
-    // 获取 Markdown 文件的目录
-    const mdDir = path.dirname(filePath);
-
-    while ((match = imageRegex.exec(content)) !== null) {
-      const [, alt, imagePath] = match;
-
-      // 处理相对路径
-      const absolutePath = path.isAbsolute(imagePath)
-          ? imagePath
-          : path.join(mdDir, imagePath);
-
-      if (await fs.pathExists(absolutePath)) {
-        const buffer = await fs.readFile(absolutePath);
-        const extension = path.extname(absolutePath).toLowerCase();
-        let mimeType = 'image/jpeg'; // 默认
-
-        if (extension === '.png') mimeType = 'image/png';
-        else if (extension === '.gif') mimeType = 'image/gif';
-        else if (extension === '.webp') mimeType = 'image/webp';
-        else if (extension === '.svg') mimeType = 'image/svg+xml';
-
-        images.push({ alt, path: absolutePath, buffer, mimeType });
-      } else {
-        console.warn(`图片文件不存在: ${absolutePath}`);
-      }
-    }
-
-    return { content, images };
-  } catch (error) {
-    console.error('解析 Markdown 文件失败:', error);
-    throw new Error(`解析 Markdown 文件失败: ${(error as Error).message}`);
-  }
+function showHelp() {
+  console.log(`\n🚀 掘金文章发布工具\n\n用法: node index.js [文件路径] [选项]\n\n参数:\n  文件路径    要发布的 Markdown 文件路径 (可选，默认为 src/test.md)\n\n选项:\n  --publish    直接发布文章 (默认只保存草稿)\n  --headless   无头模式运行 (不显示浏览器窗口)\n  --force-login 强制重新登录 (忽略已保存的登录状态)\n  --help       显示此帮助信息\n\n示例:\n  node index.js my-article.md --publish\n  node index.js --headless\n  node index.js --force-login\n\n环境变量:\n  JUEJIN_USERNAME  掘金账号 (邮箱或手机号，用于预填充登录表单)\n\n注意:\n  - 程序仅支持手动登录，确保账号安全\n  - 如果配置了 JUEJIN_USERNAME，程序会自动预填充账号信息\n  - 首次使用需要登录，登录状态会自动保存\n  - 下次启动时会自动使用已保存的登录状态\n  - 如果登录状态失效，程序会自动重新登录\n`);
 }
 
-/**
- * 主函数
- */
-async function main(): Promise<void> {
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h')) {
+    showHelp();
+    return;
+  }
+  const filePath = args.find(arg => !arg.startsWith('--')) || path.join(__dirname, '../src/test.md');
+  const shouldPublish = args.includes('--publish');
+  const openBrowser = !args.includes('--headless');
+  const forceLogin = args.includes('--force-login');
+  if (!await fs.pathExists(filePath)) {
+    throw new Error(`文件不存在: ${filePath}`);
+  }
+  const options: PublishOptions = {
+    publish: shouldPublish,
+    openBrowser,
+    useStoredLogin: !forceLogin,
+    forceLogin
+  };
+  const publisher = new JuejinPublisher(filePath, options);
   try {
-    const args = process.argv.slice(2);
-    const filePath = args[0] || join(__dirname, '../test.md');
-
-    if (!await fs.pathExists(filePath)) {
-      throw new Error(`文件不存在: ${filePath}`);
-    }
-
-    console.log(`解析文件: ${filePath}`);
-    const markdownData = await parseMarkdown(filePath);
-    console.log(`找到 ${markdownData.images.length} 张图片`);
-
-    // 将 Markdown 内容复制到剪贴板
-    try {
-      await clipboardy.write(markdownData.content);
-      console.log('Markdown 内容已复制到剪贴板');
-
-      // 输出图片信息
-      markdownData.images.forEach(({ alt, mimeType, path }: ImageData, index: number) => {
-        console.log(`图片 ${index + 1}:`);
-        console.log(`  描述: ${alt || '无'}`);
-        console.log(`  类型: ${mimeType}`);
-        console.log(`  路径: ${path}`);
-        console.log('---');
+    await publisher.init();
+    await publisher.publish();
+    if (openBrowser) {
+      console.log('浏览器已打开，请手动关闭窗口以结束程序');
+      await new Promise(resolve => {
+        process.on('SIGINT', resolve);
       });
-    } catch (error) {
-      console.error('复制到剪贴板失败:', (error as Error).message);
     }
   } catch (error) {
-    console.error('程序错误:', (error as Error).message);
+    console.error('❌ 程序执行失败:', (error as Error).message);
     process.exit(1);
+  } finally {
+    if (!openBrowser) {
+      await publisher.close();
+    }
   }
 }
 
-// 执行主函数
-main();
+if (process.argv[1] && process.argv[1].endsWith('index.js')) {
+  main();
+}

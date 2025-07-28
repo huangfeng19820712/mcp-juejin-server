@@ -71,13 +71,13 @@ for (const image of images) {
 
 ```bash
 # 保存草稿
-node src/markdown_to_juejin_publisher.js my-article.md
+node src/index.js my-article.md
 
 # 直接发布
-node src/markdown_to_juejin_publisher.js my-article.md --publish
+node src/index.js my-article.md --publish
 
 # 无头模式
-node src/markdown_to_juejin_publisher.js my-article.md --headless
+node src/index.js my-article.md --headless
 ```
 
 ### 环境变量配置

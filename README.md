@@ -51,16 +51,16 @@ LOG_LEVEL=info
 
 ```bash
 # 保存草稿（默认）
-node src/markdown_to_juejin_publisher.js my-article.md
+node src/index.js my-article.md
 
 # 直接发布文章
-node src/markdown_to_juejin_publisher.js my-article.md --publish
+node src/index.js my-article.md --publish
 
 # 无头模式运行
-node src/markdown_to_juejin_publisher.js my-article.md --headless
+node src/index.js my-article.md --headless
 
 # 强制重新登录
-node src/markdown_to_juejin_publisher.js my-article.md --force-login
+node src/index.js my-article.md --force-login
 ```
 
 ### 命令行选项
@@ -178,7 +178,7 @@ set LOG_LEVEL=debug && npm run dev -- src/example.md
 
 ```
 src/
-├── markdown_to_juejin_publisher.ts  # 主要发布逻辑
+├── index.ts  # 主要发布逻辑
 ├── types.ts                         # 类型定义
 └── index.ts                         # 入口文件
 ```
