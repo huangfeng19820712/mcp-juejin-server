@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { pino } from 'pino';
 import { MarkdownParser } from './MarkdownParser.js';
 import { MarkdownData, ArticleMetadata, PublishOptions } from './types.js';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,6 +15,9 @@ dotenv.config({ path: join(rootDir, '.env') });
 dotenv.config();
 
 function createLogger() {
+  if (process.platform === 'win32') {
+    exec('chcp 65001'); // 设置Windows控制台为UTF-8编码
+  }
   return pino({
     level: process.env.LOG_LEVEL || 'info',
     transport: {
