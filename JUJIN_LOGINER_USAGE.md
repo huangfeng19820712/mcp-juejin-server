@@ -29,7 +29,7 @@ npm install playwright opencv4nodejs sharp
 import { JuejinLoginer } from './src/JuejinLoginer.js';
 
 const loginer = new JuejinLoginer({
-  phone: '13799286551',
+  phone: '1111111111111',
   password: 'your_password'
 }, {
   maxRetries: 3,
@@ -45,7 +45,7 @@ import { test, expect } from '@playwright/test';
 
 test('掘金自动登录测试', async ({ page }) => {
   const loginer = new JuejinLoginer({
-    phone: '13799286551',
+    phone: '1111111111111',
     password: 'your_password'
   });
 
@@ -143,8 +143,8 @@ import { JuejinLoginer } from '../src/JuejinLoginer.js';
 test('掘金滑块验证码自动识别与拖动', async ({ page }) => {
   // 创建登录器实例
   const loginer = new JuejinLoginer({
-    phone: '13799286551',
-    password: '5dkLIYU@#157'
+    phone: '1111111111111',
+    password: 'XXXXXXX'
   }, {
     maxRetries: 3,
     timeout: 60000,
