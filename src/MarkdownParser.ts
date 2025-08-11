@@ -48,13 +48,15 @@ export class MarkdownParser {
       const lines = metadataText.split('\n');
       const metadata = { ...defaultMetadata };
       for (const line of lines) {
-        const parts = line.split(':', 2);
-        if (parts.length === 2) {
-          const key = parts[0].trim();
-          const value = parts[1].trim();
+        const colonIndex = line.indexOf(':');
+        if (colonIndex > 0) {
+          const key = line.substring(0, colonIndex).trim();
+          const value = line.substring(colonIndex + 1).trim();
           if (key && value) {
             if (key === 'tags') {
-              metadata.tags = value.split(',').map(tag => tag.trim());
+              // 处理 tags 数组格式，移除方括号并分割
+              const cleanValue = value.replace(/^\[|\]$/g, ''); // 移除开头和结尾的方括号
+              metadata.tags = cleanValue.split(',').map(tag => tag.trim());
             } else if (key in defaultMetadata || key === 'cover' || key === 'description') {
               (metadata as any)[key] = value;
             }

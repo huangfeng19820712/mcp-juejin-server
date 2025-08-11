@@ -29,7 +29,7 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     // 保存登录状态
-    storageState: 'juejin-storage-state.json',
+    // storageState: 'juejin-storage-state.json',
     // 更长的超时时间
     actionTimeout: 30000,
     navigationTimeout: 30000,

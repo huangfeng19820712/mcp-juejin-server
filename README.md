@@ -166,6 +166,115 @@ set LOG_LEVEL=debug && npm run dev -- src/example.md
 8. **日志输出**：程序使用彩色日志输出，便于查看操作进度和错误信息
 9. **Windows 兼容性**：程序已针对 Windows 系统进行了优化，自动处理字符编码问题，使用简化的日志格式确保中文和 emoji 正常显示
 
+## 图片处理功能
+
+### 背景图片裁剪
+
+`crop_background.ts` 模块提供了强大的图片处理功能，包括背景图片裁剪和滑块模板匹配。
+
+#### 基本裁剪功能
+
+```bash
+# 裁剪背景图片
+node src/crop_background.ts <bgPath> <top> <cropHeight> [outputPath] [browserWidth] [browserHeight]
+
+# 示例：裁剪背景图片，从第50像素开始，裁剪100像素高度
+node src/crop_background.ts bg.jpg 50 100 output.jpg 340 212
+```
+
+**参数说明：**
+- `bgPath` - 背景图片路径
+- `top` - 裁剪起始高度（像素，基于浏览器显示尺寸）
+- `cropHeight` - 裁剪高度（像素，基于浏览器显示尺寸）
+- `outputPath` - 输出图片路径（可选，不传则自动生成）
+- `browserWidth` - 浏览器显示宽度（默认340）
+- `browserHeight` - 浏览器显示高度（默认212）
+
+#### 滑块模板匹配
+
+新增的模板匹配功能可以自动识别滑块在背景图中的位置，使用 OpenCV4Node.js 进行精确匹配。
+
+```bash
+# 模板匹配模式
+node src/crop_background.ts match <bgPath> <slidePath> [outputPath]
+
+# 示例：匹配滑块位置
+node src/crop_background.ts match bg_cropped.jpg slide.png result.jpg
+```
+
+**参数说明：**
+- `bgPath` - 背景图片路径（裁剪后的）
+- `slidePath` - 滑块图片路径
+- `outputPath` - 结果图片输出路径（可选）
+
+#### 获取距离比例
+
+```bash
+# 获取距离比例模式
+node src/crop_background.ts distance <bgPath> <slidePath>
+
+# 示例：获取滑块距离比例
+node src/crop_background.ts distance bg_cropped.jpg slide.png
+```
+
+**返回值：** 位置比例（位置/图片宽度），范围 0-1
+
+#### 编程接口
+
+```typescript
+import { cropBackgroundImage, matchSliderWithBackground, getSlideDistance } from './src/crop_background';
+
+// 裁剪背景图片
+const croppedPath = await cropBackgroundImage(
+  'bg.jpg', 
+  50, 
+  100, 
+  'output.jpg', 
+  340, 
+  212
+);
+
+// 模板匹配
+const matchResult = await matchSliderWithBackground(
+  'bg_cropped.jpg', 
+  'slide.png', 
+  'result.jpg'
+);
+console.log(`位置: (${matchResult.location.x}, ${matchResult.location.y})`);
+console.log(`置信度: ${matchResult.confidence}`);
+console.log(`距离比例: ${matchResult.distanceRatio}`);
+
+// 获取距离比例
+const distanceRatio = await getSlideDistance('bg_cropped.jpg', 'slide.png');
+console.log(`距离比例: ${distanceRatio}`);
+```
+
+#### 匹配算法说明
+
+模板匹配使用以下步骤：
+
+1. **图像预处理**：
+   - 转换为灰度图
+   - 高斯模糊处理（5x5核）
+   - Canny边缘检测（阈值30-100）
+
+2. **模板匹配**：
+   - 使用 `TM_CCORR_NORMED` 方法进行归一化相关系数匹配
+   - 自动计算最佳匹配位置和置信度
+
+3. **结果输出**：
+   - 返回匹配位置坐标
+   - 返回匹配置信度（0-1）
+   - 返回距离比例（位置/图片宽度）
+   - 自动生成结果图片（包含匹配框和文本信息）
+
+#### 使用场景
+
+- **验证码识别**：自动识别滑块验证码中的缺口位置
+- **图像处理**：批量处理背景图片裁剪
+- **自动化测试**：图像对比和位置检测
+- **计算机视觉**：模板匹配和对象检测
+
 ## 错误处理
 
 - 程序会自动保存错误截图到项目根目录
